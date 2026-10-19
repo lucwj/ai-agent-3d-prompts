@@ -26,11 +26,32 @@ Prompt để tái tạo **AI Agent World**: một văn phòng 3D chạy trong tr
 
 *Bản gốc có thêm một cầu nối thử nghiệm với Claude Code hooks: thanh trên cùng đổi thành "Live backend", feed hiện đúng prompt vừa gõ trong terminal. Phần này **không** nằm trong prompt ở repo này, xem mục giới hạn.*
 
+## Điều kiện trước khi bắt đầu
+
+**Bắt buộc:** cài bộ skill [cloudai-x/threejs-skills](https://github.com/cloudai-x/threejs-skills) cho coding agent **trước khi** dán prompt. Bộ skill này cho agent kiến thức đã kiểm chứng về three.js r186, React Three Fiber 9.8 và drei 10.7, đúng các phiên bản prompt yêu cầu. Không có nó, agent sẽ viết theo API cũ trộn từ nhiều bản three.js (ví dụ `PCFSoftShadowMap` đã bị bỏ ở r186, `Clock` đã nhường chỗ cho `Timer`) và bạn sẽ mất nhiều vòng sửa lỗi. Bản gốc được dựng với bộ skill này cài trong `.claude/skills/`.
+
+Cài bằng CLI [skills](https://skills.sh):
+
+```bash
+npx skills add cloudai-x/threejs-skills
+```
+
+Hoặc cài thủ công. Claude Code đọc skill từ `~/.claude/skills/` (mọi project) hoặc `.claude/skills/` (một project):
+
+```bash
+git clone https://github.com/CloudAI-X/threejs-skills.git
+mkdir -p .claude/skills && cp -r threejs-skills/skills/* .claude/skills/
+```
+
+Kiểm tra: thư mục `.claude/skills/` phải có các skill `threejs-fundamentals`, `threejs-react-three-fiber`, `threejs-lighting`, `threejs-geometry`, `threejs-materials`, `threejs-interaction`, `threejs-animation`, ... Với agent khác Claude Code, đưa nội dung các file `SKILL.md` vào context theo cách agent đó hỗ trợ.
+
+Ngoài ra cần Node.js 22 trở lên và một trình duyệt có WebGL để xem kết quả sau mỗi giai đoạn.
+
 ## Cách dùng prompt
 
 Prompt nằm ở [`prompts/ai-agent-world.md`](prompts/ai-agent-world.md).
 
-1. Tạo một thư mục trống, mở coding agent của bạn trong đó (Claude Code, Cursor, Codex, v.v.).
+1. Tạo một thư mục trống, cài threejs-skills vào đó (mục trên), rồi mở coding agent của bạn trong thư mục này (Claude Code, Cursor, Codex, v.v.).
 2. Copy **toàn bộ** nội dung file prompt và dán vào agent. Prompt viết bằng tiếng Anh vì mã nguồn, tên biến và event đều bằng tiếng Anh; bạn vẫn có thể trò chuyện với agent bằng tiếng Việt.
 3. Prompt được chia thành **8 giai đoạn**, mỗi giai đoạn có tiêu chí nghiệm thu (mục 11 trong prompt). Nên yêu cầu agent làm **từng giai đoạn một**: sau mỗi giai đoạn chạy `npm run typecheck`, `npm run lint`, `npm test`, và mở trình duyệt xem thật trước khi sang giai đoạn tiếp.
 4. Nếu agent đủ mạnh và context đủ dài, có thể giao cả prompt một lần và yêu cầu nó tự đi theo thứ tự giai đoạn.
@@ -58,7 +79,7 @@ Nói thẳng để không ai kỳ vọng sai:
 - **Chỉ là client.** Prompt dựng giao diện 3D, UI, và một **mô phỏng tất định** chạy ngay trong trình duyệt. Mọi task card, finding, tên test đều là template chọn theo từ khóa. Không có LLM nào được gọi, không có dòng code nào được viết ra thật.
 - **Chưa có backend kết nối dữ liệu thật** của Claude, GPT, Gemini hay bất kỳ framework agent nào (LangGraph, CrewAI, ...). Prompt chỉ định nghĩa **contract** (giao thức WebSocket: `command` vào, `event` / `snapshot` / `ack` ra, cùng bộ từ vựng event) để sau này cắm backend thật vào mà không phải sửa lớp 3D và UI. Phần server implement contract đó chưa có trong repo này.
 - Bản gốc có một cầu nối thử nghiệm đọc **Claude Code hooks** (ảnh 4), nhưng nó chạy local, chỉ hiểu Claude Code, và chưa được đưa vào prompt. Nó sẽ đi cùng mã nguồn khi open source.
-- Kết quả của prompt phụ thuộc vào coding agent bạn dùng. Bản gốc được dựng và sửa qua nhiều vòng với Claude Code; agent khác có thể cần thêm hướng dẫn ở từng giai đoạn.
+- Prompt được viết và thử với Claude Code có cài threejs-skills. Kết quả phụ thuộc vào coding agent bạn dùng; bản gốc được dựng và sửa qua nhiều vòng, agent khác có thể cần thêm hướng dẫn ở từng giai đoạn.
 
 ## Những vấn đề cần cải thiện
 
